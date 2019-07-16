@@ -1,0 +1,11 @@
+{
+    //"exclude": ["node_modules"],
+    "compilerOptions": {
+        "noImplicitAny": false,
+        "module": "commonjs",
+        "target": "es2018",
+        "sourceMap": true,
+        "outDir": "./out",
+        "watch": true
+    }
+}
