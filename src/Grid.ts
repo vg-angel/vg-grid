@@ -1,26 +1,22 @@
-import { ctx } from "./globals";
-
-interface Point2D{
-    x: number
-    y: number
-}
+import { Vector2D as vec2} from "vg-vector";
 
 /** Grid constructor Parameters*/
 interface P{
     /** the context in where to draw the canvas must be an HTMLCanvasElement */
     ctx: CanvasRenderingContext2D
      /**Center point of the Grid*/
-    center?: Point2D
+    cp: vec2
     /** the width of the grid */
     width?: number
     /** the height of the grid */
     height?: number
-    /** the unit width of the lines */
-    unitw?: number
-    /**the unit height of the lines */
-    unith?: number
+    /** the unit vector is goona be used to create the entire grid */
+    unit: {
+        x: vec2
+        y: vec2
+    }
     /**Style for drawing axes and grid*/
-    style?: {
+    //style?: {
         /** grid of the canvas */
         //grid?  : Style
         /** Axis of the canvas */
@@ -28,153 +24,131 @@ interface P{
         //left?  : Style
         //up?    : Style
         //down?  : Style
-    }
+    //}
 }
 
+
 class Grid{
-    
-    private gridPoints: number[]
-    p: P
 
-    constructor(params: P){
-        this.p = params
-        this.p.center = params.center || {x:0 , y:0}
-        return this
+    cp: vec2
+    unit: {
+        x: vec2
+        y: vec2
     }
+    height: number
+    width: number
+    ctx: CanvasRenderingContext2D
+    points: vec2[]
 
-    /** Getters and Setters */
+    constructor(p: P){
+        let {
+            cp,
+            unit,
+            width,
+            height
+        }: P = p
 
-    get center(){
-        return this.p.center
-    }
-    set center(center: Point2D){
-        this.p.center = center
-    }
-
-    get cx(){
-        return this.p.center.x
-    }
-    set cx(x: number){
-        this.p.center.x = x
-    }
-
-    get cy(){
-        return this.p.center.y
-    }
-    set cy(y: number){
-        this.p.center.y = y
-
-    }
-
-    get width(){
-        return this.p.width
-    }
-    set width(val: number){
-        this.p.width = val
+        this.height = width  || 300
+        this.width  = height || 300
+        this.ctx    = p.ctx
+        this.cp     = cp
+        this.unit   = {
+            x: unit.x,
+            y: unit.y,
+        }
+        this.points = []
     }
     
-    get height(){
-        return this.p.height
-    }
-    set height(val: number){
-        this.p.height = val
+    // -----GETTERS AND SETTERS
+
+    /** get Unit vectors values*/
+    get unitx(): vec2{
+        return this.unit.x
     }
 
-    get unitw(){
-        return this.p.unitw
-    }
-    set unitw(val: number){
-        this.p.unitw = val
+    /**get the unit vector in y */
+    get unity(): vec2{
+        return this.unit.y
     }
 
-    get unith(){
-        return this.p.unith
+    /** get center point in x */
+    get cpx(): number{
+        return this.cp.x
     }
-    set unith(val: number){
-        this.p.unith = val
-    }
-
-    get ctx(){
-        return this.p.ctx
-    }
-    set ctx(val: CanvasRenderingContext2D){
-        this.p.ctx = val
+    /**center point in y */
+    get cpy(): number{
+        return this.cp.y
     }
 
+    //-----private methods
 
-    /** Private methods */
 
+    /** get the angle from the unit vestor used to draw X-axis */
+    private get angX(){
+        return this.unit.x.ang
+    }
+    private get angY(){
+        return this.unit.y.ang
+    }
 
-    /**Calculate points to draw Horizontal and Vertical Lines*/
-    private calcHVL(): void{
+    private XAxisPoints(){
+
+        let i_unit = vec2.clone(this.unitx)
+        i_unit.len = this.width/2
+
+        let p1 = vec2.add( this.cp, i_unit )
+        let p2 = vec2.sub( this.cp, i_unit )
         
-        let totalx = this.width / this.unitw
-        let totaly = this.height / this.unith
-        let points = []
+        this.points.push(p1, p2)
 
-        for(let i = 0; i < totaly/2 + 1; i++) {          
-            points.push(
-                this.cx - this.width/2  ,  this.cy + this.unith*i,
-                this.cx + this.width/2  ,  this.cy + this.unith*i,
-                
-                this.cx - this.width/2  ,  this.cy - this.unith*i,
-                this.cx + this.width/2  ,  this.cy - this.unith*i,
-
-            )
-        }
-        for(let i = 0; i < totalx/2 + 1; i++) {          
-            points.push(
-                this.cx + this.unitw*i ,  this.cy - this.height/2,
-                this.cx + this.unitw*i ,  this.cy + this.height/2,
-         
-                this.cx - this.unitw*i ,  this.cy - this.height/2,
-                this.cx - this.unitw*i ,  this.cy + this.height/2,
-            )
-        }
-
-        //let buffer = new ArrayBuffer(totalx+totaly)
-        this.gridPoints = points
     }
-    draw(){
+    private YAxisPoints(){
+        
+        let i_unit = vec2.clone(this.unity)
+        i_unit.len = this.height/2
 
-        for (let i = 0; i < this.gridPoints.length; i+=4) {
+        let p2 = vec2.add( this.cp, i_unit )
+        let p3 = vec2.sub( this.cp, i_unit )
 
-            let {ctx} = this
+        this.points.push(p2, p3)
+
+    }
+
+
+    // ----  public methods
+    drawAxis(){
+        
+        this.XAxisPoints()
+        this.YAxisPoints()
+        
+        console.log(this.points)
+
+        let {ctx} = this
+        let {points} = this
+
+        for (let i = 0; i < points.length; i+=2) {
+
+            let p1 = this.points[i+0];
+            let p2 = this.points[i+1];
 
             ctx.beginPath()
-            ctx.moveTo(this.gridPoints[i+0]  ,  this.gridPoints[i+1])
-            ctx.lineTo(this.gridPoints[i+2]  ,  this.gridPoints[i+3])
+            ctx.moveTo(p1.x, p1.y)
+            ctx.lineTo(p2.x, p2.y)
             ctx.stroke()
             ctx.closePath()
+
         }
 
+        // draw center point
+            ctx.beginPath()
+            
+            ctx.arc( this.cpx, this.cpy, 5, 0, Math.PI*2 )
+            ctx.fill()
+            ctx.stroke()
+            
+            ctx.closePath()
     }
 
-    /** public methods */
-
-
-    /** set default parameters */
-    defaults(){
-        this.cx     = 200
-        this.cy     = 200
-        this.height = 300
-        this.width  = 300
-        this.unith  = 30
-        this.unitw  = 30
-    }
-    init(){
-        this.calcHVL()
-        this.draw()
-    }
-    log(){
-        console.log(
-            "points " , this.gridPoints, "\n",
-            "center"  , this.center
-        )
-    }
-    ang(){
-        return Math.atan2(this.cy, this.cx)
-    }
 }
 
 export default Grid
