@@ -1,28 +1,29 @@
-const path = require("path")
+const path=require("path")
 
-module.exports = {
+module.exports={
     entry: "./src/index.ts",
     output: {
         filename: "index.js",
-        path: path.join(__dirname, "dist"),
+        path: path.resolve('dist'),
+        library: "Grid"
     },
-    mode: "development",
+    mode: 'development',
+    devtool: 'inline-dev-tool',
     resolve: {
-        extensions: [".js" , ".ts", ".tsx"]
-    },
-    devServer: {
-        port: 3000,
-        host: "localhost",
-        compress: true,
-        contentBase: path.join(__dirname, "dist")
+        extensions: ['.ts', '.js']
     },
     module: {
         rules: [
             {
-               test: /\.ts$/,
-               use: "ts-loader",
-               exclude: /node_modules/
+                test: /\.ts$/,
+                use: 'ts-loader',
+                exclude: /node_modules/
             }
         ]
+    },
+    devServer: {
+        host: 'localhost',
+        port: 3000,
+        contentBase: path.resolve('dist')
     }
 }

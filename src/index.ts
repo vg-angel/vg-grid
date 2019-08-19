@@ -1,22 +1,21 @@
-import Grid from "./Grid";
-import { ctx , w, h} from "./globals";
-import { Vector2D as vec2} from "vg-vector";
+/*example*/
 
-let grid = new Grid({
-    ctx,
-    cp: new vec2(w/2, h/2),
-    height: 300,
-    width:  300,
-    unit:{
-       x: new vec2(30, 0  ), //  0  inclinacion  (0 , 0)
-       y: new vec2(0 , 30 )  //  90 inclinacion  (0,  0)
-    },
+import Grid from "./Grid"
+
+let canvas = <HTMLCanvasElement> document.getElementById('canvas')
+let context = <CanvasRenderingContext2D> canvas.getContext("2d")
+canvas.width = innerWidth
+canvas.height = innerHeight
+
+let migrid = new Grid({
+    cX: 100,
+    cY: 50,
+    cellH: 20,
+    cellW: 20,
+    context,
+    wH: innerHeight,
+    wW: innerWidth,
+    gH: 123,
+    gW: 1234
 })
-grid.drawAxis()
-
-function render(){
-    ctx.clearRect(0,0,w,h)
-    requestAnimationFrame(render)
-}
-
-export default Grid
+migrid.draw()

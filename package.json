@@ -17,9 +17,14 @@
   "scripts": {
     "test": "jest",
     "build": "webpack",
-    "server": "webpack-dev-server"
+    "server": "webpack-dev-server",
+    "init": "tsc -init"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": [
+    "grid",
+    "image",
+    "vector"
+  ],
+  "author": "Angel V. G.",
+  "license": "UNLICENSED"
 }

@@ -1,154 +1,101 @@
-import { Vector2D as vec2} from "vg-vector";
-
-/** Grid constructor Parameters*/
-interface P{
-    /** the context in where to draw the canvas must be an HTMLCanvasElement */
-    ctx: CanvasRenderingContext2D
-     /**Center point of the Grid*/
-    cp: vec2
-    /** the width of the grid */
-    width?: number
-    /** the height of the grid */
-    height?: number
-    /** the unit vector is goona be used to create the entire grid */
-    unit: {
-        x: vec2
-        y: vec2
-    }
-    /**Style for drawing axes and grid*/
-    //style?: {
-        /** grid of the canvas */
-        //grid?  : Style
-        /** Axis of the canvas */
-        //right? : Style
-        //left?  : Style
-        //up?    : Style
-        //down?  : Style
-    //}
+interface Params {
+    cX: number /*center x of the grid * */
+    cY: number /*center y of the grid */
+    gW: number /*grid width*/
+    gH: number /*grid height*/
+    wW: number /*windows width */
+    wH: number /*windows height */
+    cellW: number /* cell width */
+    cellH: number /* cell height */
+    context: CanvasRenderingContext2D /**the context in wich to draw */
+    style?: {}    /* style according to canvas style */
 }
 
-
-class Grid{
-
-    cp: vec2
-    unit: {
-        x: vec2
-        y: vec2
+export default class Grid {
+    obj: Params
+    constructor(obj: Params) {
+        this.obj = obj
+        return this
     }
-    height: number
-    width: number
-    ctx: CanvasRenderingContext2D
-    points: vec2[]
+    draw() {
 
-    constructor(p: P){
         let {
-            cp,
-            unit,
-            width,
-            height
-        }: P = p
+            cellH: cH, 
+            cellW: cW, 
+            context: c,
+            cX, cY,
+            wW, wH,
+        }: Partial<Params> = this.obj
 
-        this.height = width  || 300
-        this.width  = height || 300
-        this.ctx    = p.ctx
-        this.cp     = cp
-        this.unit   = {
-            x: unit.x,
-            y: unit.y,
+        let cellNW = wW / cW
+        let cellNH = wH / cH
+        
+        let xi = 0 - cX 
+        let xf = xi + wW
+        let yi = 0 - cY
+        let yf = yi + wH
+
+        c.save()
+        c.beginPath()
+        c.translate(cX, cY)
+
+        /** X axis */
+        c.save()
+        c.beginPath()
+        c.lineWidth = 3
+        c.strokeStyle = 'blue'
+        c.moveTo(xi, 0)
+        c.lineTo(xf, 0)
+        c.stroke()
+        c.closePath()
+        c.restore()
+        
+        /** Y axis */
+        c.save()
+        c.beginPath()
+        c.lineWidth = 3
+        c.strokeStyle = 'blue'
+        c.moveTo(0, yi)
+        c.lineTo(0, yf)
+        c.stroke()
+        c.closePath()
+        c.restore()
+
+
+        /** draw horizontal lines */
+        for (let i = 0; i < cellNH; i++) { 
+                if(i*cH > yi){
+                    c.moveTo( xi, i*cH )
+                    c.lineTo( xf, i*cH )
+                    c.stroke()
+                }
+                if(-i*cH < yf){
+                    c.moveTo( xi, -i*cH )
+                    c.lineTo( xf, -i*cH )
+                    c.stroke() 
+                }
+               /*  c.moveTo( xi, yi+i*cH )
+                    c.lineTo( xf, yi+i*cH )
+                    c.stroke() */
         }
-        this.points = []
-    }
-    
-    // -----GETTERS AND SETTERS
-
-    /** get Unit vectors values*/
-    get unitx(): vec2{
-        return this.unit.x
-    }
-
-    /**get the unit vector in y */
-    get unity(): vec2{
-        return this.unit.y
-    }
-
-    /** get center point in x */
-    get cpx(): number{
-        return this.cp.x
-    }
-    /**center point in y */
-    get cpy(): number{
-        return this.cp.y
-    }
-
-    //-----private methods
-
-
-    /** get the angle from the unit vestor used to draw X-axis */
-    private get angX(){
-        return this.unit.x.ang
-    }
-    private get angY(){
-        return this.unit.y.ang
-    }
-
-    private XAxisPoints(){
-
-        let i_unit = vec2.clone(this.unitx)
-        i_unit.len = this.width/2
-
-        let p1 = vec2.add( this.cp, i_unit )
-        let p2 = vec2.sub( this.cp, i_unit )
-        
-        this.points.push(p1, p2)
-
-    }
-    private YAxisPoints(){
-        
-        let i_unit = vec2.clone(this.unity)
-        i_unit.len = this.height/2
-
-        let p2 = vec2.add( this.cp, i_unit )
-        let p3 = vec2.sub( this.cp, i_unit )
-
-        this.points.push(p2, p3)
-
-    }
-
-
-    // ----  public methods
-    drawAxis(){
-        
-        this.XAxisPoints()
-        this.YAxisPoints()
-        
-        console.log(this.points)
-
-        let {ctx} = this
-        let {points} = this
-
-        for (let i = 0; i < points.length; i+=2) {
-
-            let p1 = this.points[i+0];
-            let p2 = this.points[i+1];
-
-            ctx.beginPath()
-            ctx.moveTo(p1.x, p1.y)
-            ctx.lineTo(p2.x, p2.y)
-            ctx.stroke()
-            ctx.closePath()
-
+        /** draw vertical lines */
+        for (let i = 0; i < cellNW; i++) {
+            if(i*cW > xi){
+                c.moveTo(  i*cW, yi )
+                c.lineTo(  i*cW, yf )
+                c.stroke()
+            }
+            if(-i*cW < xf){
+                c.moveTo(  -i*cW, yi )
+                c.lineTo(  -i*cW, yf )
+                c.stroke() 
+            }
+            /* c.moveTo( xi+i*cW, yi  )
+            c.lineTo( xi+i*cW, yf )
+            c.stroke() */
         }
 
-        // draw center point
-            ctx.beginPath()
-            
-            ctx.arc( this.cpx, this.cpy, 5, 0, Math.PI*2 )
-            ctx.fill()
-            ctx.stroke()
-            
-            ctx.closePath()
+        c.closePath()
+        c.restore()
     }
-
 }
-
-export default Grid
