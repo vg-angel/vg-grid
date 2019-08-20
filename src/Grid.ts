@@ -25,6 +25,7 @@ export default class Grid {
             context: c,
             cX, cY,
             wW, wH,
+            gW, gH, gX, gY,
         }: Partial<Params> = this.obj
 
         let cellNW = wW / cW
@@ -36,19 +37,20 @@ export default class Grid {
         let yf = yi + wH
 
         c.save()
-        c.beginPath()
         c.translate(cX, cY)
 
         /** X axis */
-        c.save()
-        c.beginPath()
-        c.lineWidth = 3
-        c.strokeStyle = 'blue'
-        c.moveTo(xi, 0)
-        c.lineTo(xf, 0)
-        c.stroke()
-        c.closePath()
-        c.restore()
+        if(cX > gX || cX < gX+gW){
+            c.save()
+            c.beginPath()
+            c.lineWidth = 3
+            c.strokeStyle = 'blue'
+            c.moveTo(xi, 0)
+            c.lineTo(xf, 0)
+            c.stroke()
+            c.closePath()
+            c.restore()
+        }
         
         /** Y axis */
         c.save()
@@ -65,14 +67,18 @@ export default class Grid {
         /** draw horizontal lines */
         for (let i = 0; i < cellNH; i++) { 
                 if(i*cH > yi){
+                    c.beginPath()
                     c.moveTo( xi, i*cH )
                     c.lineTo( xf, i*cH )
                     c.stroke()
+                    c.closePath()
                 }
                 if(-i*cH < yf){
+                    c.beginPath()
                     c.moveTo( xi, -i*cH )
                     c.lineTo( xf, -i*cH )
                     c.stroke() 
+                    c.closePath()
                 }
                /*  c.moveTo( xi, yi+i*cH )
                     c.lineTo( xf, yi+i*cH )
@@ -95,7 +101,6 @@ export default class Grid {
             c.stroke() */
         }
 
-        c.closePath()
         c.restore()
     }
 }

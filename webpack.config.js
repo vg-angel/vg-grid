@@ -1,6 +1,7 @@
 const path=require("path")
 
 module.exports={
+    watch: true,
     entry: "./src/index.ts",
     output: {
         filename: "index.js",
